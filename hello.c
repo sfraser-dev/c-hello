@@ -3,6 +3,22 @@
 #include <string.h>
 
 int main() {
+    // typedef of unnamed enum will have only a bool_t type
+    typedef enum { FALSE, TRUE } bool_t;
+    bool_t falsey = FALSE;
+    !(FALSE) ? printf("falsey = %d\n", falsey) : 1 ;
+ 
+    // enum simple
+    enum vals { start = 10, next1, next2, end };
+    enum vals ebegin = start;
+    printf("start = %d\n", ebegin);
+    enum vals en1 = next1;
+    printf("next1 = %d\n", en1);
+    enum vals en2 = next2;
+    printf("next2 = %d\n", en2);
+    enum vals eend = end;
+    printf("next3 = %d\n", eend);
+
     // text-length plus one for implicitly added nul character '\0'
     char name_array_fixed[6] = "Harry";
     short size = (strlen(name_array_fixed) + 1) * sizeof(char);
@@ -17,7 +33,7 @@ int main() {
     // string of unkown length, count until '\0'
     char *name_ptr_unknown_length = "Poindexter";
     short len = 0;
-    while (1) {
+    while (TRUE) {
         char c = *(name_ptr_unknown_length + len);
         if (c == '\0') {
             break;
@@ -25,26 +41,6 @@ int main() {
         len++;
     }
     printf("there are %d letters in %s\n", len, name_ptr_unknown_length);
-
-    // enum simple
-    enum vals { start = 10, next1, next2, end };
-    enum vals vbegin = start;
-    printf("start = %d\n", vbegin);
-    enum vals vn1 = next1;
-    printf("next1 = %d\n", vn1);
-    enum vals vn2 = next2;
-    printf("next2 = %d\n", vn2);
-    enum vals vend = end;
-    printf("next3 = %d\n", vend);
-
-    // typedef of unnamed emun will only have bool_t type
-    typedef enum { FALSE, TRUE } bool_t;
-    bool_t success = TRUE;
-    if (success) {
-        printf("worked! success = %d\n", success);
-    } else {
-        printf("failed! success = %d\n", success);
-    }
 
     return 0;
 }

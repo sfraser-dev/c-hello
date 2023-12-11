@@ -1,6 +1,6 @@
 CC := clang
-# SANITIZEFLAGS := -fsanitize=address
-SANITIZEFLAGS :=
+SANITIZEFLAGS := -fsanitize=address
+# SANITIZEFLAGS :=
 CFLAGS := -g -Wall $(SANITIZEFLAGS)
 LDFLAGS := $(SANITIZEFLAGS)
 INCLUDEDIRS := -I.
@@ -8,10 +8,10 @@ RM := rm -f
 
 default: all
 
-all: hello.exe leak-free.exe leaky1.exe leaky2.exe \
+all: a.out leak-free.exe leaky1.exe leaky2.exe \
 	leaky3.exe
 
-hello.exe: hello.o
+a.out: hello.o
 	$(CC) $(LDFLAGS) $< -o $@
 
 hello.o: hello.c

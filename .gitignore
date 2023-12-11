@@ -3,6 +3,7 @@
 
 # Me
 *.log
+a.out
 
 ### C ###
 # Prerequisites
