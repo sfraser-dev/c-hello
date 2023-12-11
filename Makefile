@@ -1,5 +1,5 @@
 CC := clang
-CFLAGS := -g -Wall 
+CFLAGS := -g -Wall fsanitize=address -static-libasan
 LDFLAGS :=
 INCLUDEDIRS := -I.
 RM := rm -f
