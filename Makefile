@@ -1,5 +1,6 @@
 CC := clang
-SANITIZEFLAGS := -fsanitize=address
+# SANITIZEFLAGS := -fsanitize=address
+SANITIZEFLAGS :=
 CFLAGS := -g -Wall $(SANITIZEFLAGS)
 LDFLAGS := $(SANITIZEFLAGS)
 INCLUDEDIRS := -I.
