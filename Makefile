@@ -7,7 +7,8 @@ RM := rm -f
 
 default: all
 
-all: hello.exe leak-free.exe leaky.exe
+all: hello.exe leak-free.exe leaky1.exe leaky2.exe \
+	leaky3.exe
 
 hello.exe: hello.o
 	$(CC) $(LDFLAGS) $< -o $@
@@ -18,7 +19,13 @@ hello.o: hello.c
 leak-free.exe: leak-free.c
 	$(CC) $< $(CFLAGS) $(INCLUDEDIRS) -o $@
 
-leaky.exe: leaky.c
+leaky1.exe: leaky1.c
+	$(CC) $< $(CFLAGS) $(INCLUDEDIRS) -o $@
+
+leaky2.exe: leaky2.c
+	$(CC) $< $(CFLAGS) $(INCLUDEDIRS) -o $@
+
+leaky3.exe: leaky3.c
 	$(CC) $< $(CFLAGS) $(INCLUDEDIRS) -o $@
 
 .PHONY: clean
