@@ -7,8 +7,8 @@ int main() {
     char name_array_fixed[6] = "Harry";
     short size = (strlen(name_array_fixed) + 1) * sizeof(char);
     char *name_ptr_copy = malloc(size);
-    strcpy_s(name_ptr_copy, size, name_array_fixed);
-    printf("there are %llu letters in %s\n", strlen(name_array_fixed), name_array_fixed);
+    strcpy(name_ptr_copy, name_array_fixed);
+    printf("there are %lu letters in %s\n", strlen(name_array_fixed), name_array_fixed);
     printf("copying %s\n", name_ptr_copy);
     // clean up malloc'd memory
     free(name_ptr_copy);
@@ -27,21 +27,21 @@ int main() {
     printf("there are %d letters in %s\n", len, name_ptr_unknown_length);
 
     // enum simple
-    enum vals {start=10, next1, next2, end};
+    enum vals { start = 10, next1, next2, end };
     enum vals vbegin = start;
-    printf("start = %d\n",vbegin);
+    printf("start = %d\n", vbegin);
     enum vals vn1 = next1;
-    printf("next1 = %d\n",vn1);
+    printf("next1 = %d\n", vn1);
     enum vals vn2 = next2;
-    printf("next2 = %d\n",vn2);
+    printf("next2 = %d\n", vn2);
     enum vals vend = end;
-    printf("next3 = %d\n",vend);
-    
+    printf("next3 = %d\n", vend);
+
     // typedef of unnamed emun will only have bool_t type
     typedef enum { FALSE, TRUE } bool_t;
     bool_t success = TRUE;
     if (success) {
-        printf("worked! success = %d\n",success);
+        printf("worked! success = %d\n", success);
     } else {
         printf("failed! success = %d\n", success);
     }
