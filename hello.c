@@ -5,7 +5,11 @@
 
 char **my_regex_run(const char *regex, const char *subject, int *amount_of_matches);
 void my_regex_print_results(const char **rows_of_substrings, const int amount_of_matches);
-void my_regex_free_substrings(char**rows_of_substrings, int amount_of_matches);
+void my_regex_free_substrings(char **rows_of_substrings, int amount_of_matches);
+void simple_addition(int a, int b);
+void simple_subtraction(int a, int b);
+void simple_multiplication(int a, int b);
+void simple_division(int a, int b);
 
 int main() {
     // typedef of unnamed enum will have only a bool_t type
@@ -74,7 +78,7 @@ int main() {
     }
     printf("\n");
 
-    // regex in C using the pcre library
+    // regex: C regex using the pcre library
     const char *regex = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
     const char *subject = "Lloyd Rochester";
     // const char *subject = "John McCarthy";
@@ -85,22 +89,83 @@ int main() {
     my_regex_print_results((const char **)rows_of_substrings, amount_of_matches);
     my_regex_free_substrings(rows_of_substrings, amount_of_matches);
 
-    // getting user input from fgets() and checking / matching it with regex
+    // regex: getting user input from fgets() and checking / matching it with regex
     printf("enter the following: FIRSTNAME SURNAME AGE: ");
     fgets(str_in3, sizeof(str_in3), stdin);
     printf("str_in3 = %s", str_in3);
     // word boundary '\b' is zero width so cannot represent a whitespace
-    const char* regex2 = "^(\\w+)\\b\\s+\\b(\\w+)\\b\\s+\\b(\\d+)$";
+    const char *regex2 = "^(\\w+)\\b\\s+\\b(\\w+)\\b\\s+\\b(\\d+)$";
     char **rows_of_substrings2 = NULL;
     int amount_of_matches2 = -1;
-    rows_of_substrings2 = my_regex_run(regex2, (const char*)str_in3, &amount_of_matches2);
+    rows_of_substrings2 = my_regex_run(regex2, (const char *)str_in3, &amount_of_matches2);
     my_regex_print_results((const char **)rows_of_substrings2, amount_of_matches2);
     my_regex_free_substrings(rows_of_substrings2, amount_of_matches2);
+    printf("\n");
+
+    // character ASCII values
+    printf("ASCII 'A' = %d\n", 'A');
+    printf("ASCII 'a' = %d\n", 'a');
+    printf("ASCII 'Z' = %d\n", 'Z');
+    printf("ASCII 'z' = %d\n", 'z');
+    printf("ASCII '0' = %d\n", '0');
+    printf("ASCII '9' = %d\n", '9');
+
+    // bitwise operations
+    short _2 = 2;              // 010
+    short _3 = 3;              // 011
+    short _xor = _2 ^ _3;      // 001
+    short _3left1 = _3 << 1;   // 110
+    short _2right1 = _2 >> 1;  // 001
+    short _3complement = ~_3;  // 100
+    printf("xor (2^3) = %hi\n", _xor);
+    printf("3 << 1 = %hi\n", _3left1);
+    printf("2 >> 1 = %hi\n", _2right1);
+    printf("~3 (complement is -(N+1)) = %hi\n", _3complement);
+    printf("\n");
+
+    // function pointers
+    // function pointers point to code, not data (points to start of executable code)
+    // unlike normal pointers, we don't allocate / deallocate memory for function pointers
+    // like normal pointers, can have an array of function pointers (like a switch statement)
+    void (*fun_ptr)(int, int);  // declare funtion pointer 
+    fun_ptr = &simple_addition;
+    (*fun_ptr)(10, 5);
+    fun_ptr = &simple_subtraction;
+    (*fun_ptr)(10, 5);
+    fun_ptr = &simple_multiplication;
+    (*fun_ptr)(10, 5);
+    fun_ptr = simple_division; // nb: name of function also holds its address
+    fun_ptr(10, 5); // nb: don't need to explicitly dereference a function pointer
+    printf("\n");
+
+    // declare and define an array of function pointers
+    void (*fun_ptr_array[4])(int, int) = {simple_addition, simple_subtraction, simple_multiplication, simple_division};
+
+    // array of function pointers is like a switch statement
+    fun_ptr_array[0](10,5); 
+    fun_ptr_array[1](10,5); 
+    fun_ptr_array[2](10,5); 
+    fun_ptr_array[3](10,5); 
+    printf("\n");
+
+    // function poiters cleaner code with typedefs
+    typedef void (*fun_ptr_type)(int, int); // typedef name will be fun_ptr_type
+    fun_ptr_type fp = simple_multiplication;
+    fp(10,5);
+
 
     return 0;
 }
 
-void my_regex_free_substrings(char**rows_of_substrings, int amount_of_matches) {
+void simple_addition(int a, int b) { printf("%d+%d=%d\n", a, b, a + b); }
+
+void simple_subtraction(int a, int b) { printf("%d-%d=%d\n", a, b, a - b); }
+
+void simple_multiplication(int a, int b) { printf("%d*%d=%d\n", a, b, a * b); }
+
+void simple_division(int a, int b) { printf("%d/%d=%.1f\n", a, b, ((float)a) / b); }
+
+void my_regex_free_substrings(char **rows_of_substrings, int amount_of_matches) {
     for (int i = 0; i < amount_of_matches; ++i) {
         free(rows_of_substrings[i]);
         rows_of_substrings[i] = NULL;
