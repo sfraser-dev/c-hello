@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+char **my_regex_run(const char *regex, const char *subject, int *amount_of_matches);
+void my_regex_print_results(const char **rows_of_substrings, const int amount_of_matches);
+void my_regex_free_substrings(char**rows_of_substrings, int amount_of_matches);
+
 int main() {
     // typedef of unnamed enum will have only a bool_t type
     typedef enum { FALSE, TRUE } bool_t;
@@ -43,60 +47,116 @@ int main() {
     }
     printf("there are %d letters in %s\n", len, name_ptr_unknown_length);
 
-    // user string input using fgets() then capturing items from this string using sscanf()
-    char str_in1[30];
+    // getting user input via fgets() and then capturing and checking it with sscanf()
+    char str_in1[30], str_in2[30], str_in3[30];
     int cap_num, ret_val;
-    char cap_str[30];
-    printf("enter your name and age: "); /* best to not use scanf, leaves '\n' in buffer */
+    printf("enter your age: "); /* best to not use scanf, leaves '\n' in buffer */
     // right to left, read from stdin to str_in1
     fgets(str_in1, sizeof((str_in1)), stdin);
     // left to right, str_in1 is captured / formatted (%x) into f_num
-    ret_val = sscanf(str_in1, "%s      %d", cap_str, &cap_num);
+    ret_val = sscanf(str_in1, "%d", &cap_num);
     if (ret_val > 0) {
-        printf("sscanf formatted %d items.\nyour name is %s and you are %d\n", ret_val, cap_str, cap_num);
+        printf("sscanf formatted %d items.\nyour age is %d\n", ret_val, cap_num);
     } else if (ret_val == 0) {
         printf("sscanf didn't format any items\n");
     } else {
         printf("sscanf error\n");
     }
-    char str_in2[30];
-    printf("now enter just your name: ");
+    printf("now enter your name: ");
     fgets(str_in2, sizeof(str_in2), stdin);
-    printf("your name is %s", str_in2);
+    ret_val = sscanf(str_in2, "%s", str_in2);
+    if (ret_val > 0) {
+        printf("sscanf formatted %d items.\nyour name is %s\n", ret_val, str_in2);
+    } else if (ret_val == 0) {
+        printf("sscanf didn't format any items\n");
+    } else {
+        printf("sscanf error\n");
+    }
     printf("\n");
 
-    // regex via pcre.h and -lpcre (version 1 of pcre)
+    // regex in C using the pcre library
+    const char *regex = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
+    const char *subject = "Lloyd Rochester";
+    // const char *subject = "John McCarthy";
+    char **rows_of_substrings = NULL;
+    int amount_of_matches = -1;
+    printf("regex in C...\n");
+    rows_of_substrings = my_regex_run(regex, subject, &amount_of_matches);
+    my_regex_print_results((const char **)rows_of_substrings, amount_of_matches);
+    my_regex_free_substrings(rows_of_substrings, amount_of_matches);
+
+    // getting user input from fgets() and checking / matching it with regex
+    printf("enter the following: FIRSTNAME SURNAME AGE: ");
+    fgets(str_in3, sizeof(str_in3), stdin);
+    printf("str_in3 = %s", str_in3);
+    // word boundary '\b' is zero width so cannot represent a whitespace
+    const char* regex2 = "^(\\w+)\\b\\s+\\b(\\w+)\\b\\s+\\b(\\d+)$";
+    char **rows_of_substrings2 = NULL;
+    int amount_of_matches2 = -1;
+    rows_of_substrings2 = my_regex_run(regex2, (const char*)str_in3, &amount_of_matches2);
+    my_regex_print_results((const char **)rows_of_substrings2, amount_of_matches2);
+    my_regex_free_substrings(rows_of_substrings2, amount_of_matches2);
+
+    return 0;
+}
+
+void my_regex_free_substrings(char**rows_of_substrings, int amount_of_matches) {
+    for (int i = 0; i < amount_of_matches; ++i) {
+        free(rows_of_substrings[i]);
+        rows_of_substrings[i] = NULL;
+    }
+    free(rows_of_substrings);
+    rows_of_substrings = NULL;
+}
+
+void my_regex_print_results(const char **rows_of_substrings, const int amount_of_matches) {
+    if (rows_of_substrings == NULL) {
+        fprintf(stderr, "rows_of_substrings = NULL\n");
+    } else {
+        if (amount_of_matches <= 0) {
+            fprintf(stderr, "amount_of_matches <= 0\n");
+        } else {
+            for (int i = 0; i < amount_of_matches; ++i) {
+                printf("%d: %s\n", i, rows_of_substrings[i]);
+            }
+        }
+    }
+}
+
+char **my_regex_run(const char *regex, const char *subject, int *amount_of_matches) {
     /* for pcre_compile */
     pcre *re;
     const char *error;
     int erroffset;
+
     /* for pcre_exec */
-    int rc; // count
     int ovector[30];
+
     /* to get substrings from regex */
-    int rc2 = -100;
     const char *substring;
-    // we'll start after the first quote and chop off the end quote
-    const char *regex = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
-    const char *subject = "Lloyd Rochester";
-    /* compile */
+
+    char **rows_of_substrings = NULL;
+
+    // const char *subject = "John McCarthy";
     re = pcre_compile(regex, 0, &error, &erroffset, NULL);
-    /* execute */
-    rc = pcre_exec(re, NULL, subject, strlen(subject), 0, 0, ovector, 30);
-    if (rc == PCRE_ERROR_NOMATCH) {
+
+    *amount_of_matches = pcre_exec(re, NULL, subject, strlen(subject), 0, 0, ovector, 30);
+
+    if (*amount_of_matches == PCRE_ERROR_NOMATCH) {
         fprintf(stderr, "no match\n");
-    } else if (rc < -1) {
-        fprintf(stderr, "error %d from regex\n", rc);
+    } else if (*amount_of_matches < -1) {
+        fprintf(stderr, "error %d from regex\n", *amount_of_matches);
     } else {
-        // loop through matches and return them
-        for (int i = 0; i < rc; i++) {
-            rc2 = pcre_get_substring(subject, ovector, rc, i, &substring);
-            printf("%d: %s\n", i, substring);
+        rows_of_substrings = malloc((*amount_of_matches) * sizeof(char *));
+        /* loop through matches and return them */
+        for (int i = 0; i < *amount_of_matches; ++i) {
+            pcre_get_substring(subject, ovector, *amount_of_matches, i, &substring);
+            rows_of_substrings[i] = malloc(30 * sizeof(char));
+            strncpy(rows_of_substrings[i], substring, 30);
             pcre_free_substring(substring);
         }
     }
-    /* free the regex */
     pcre_free(re);
 
-    return rc2;
+    return rows_of_substrings;
 }

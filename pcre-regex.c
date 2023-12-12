@@ -4,21 +4,41 @@
 #include <string.h>
 
 /* https://lloydrochester.com/post/c/regex_pcre/ */
-/* apt-get install libpcre3 libpcre3-dev */
+
+/* $> apt-get install libpcre3 libpcre3-dev
+This installs pcre (version 1!) */
+
 /* gcc pcre-regex.c -lpcre -o a.out */
 
-char **run_regex(const char *, const char *, int *);
+char **my_regex_run(const char *, const char *, int *);
+void my_regex_print_results(const char **, const int);
+void my_regex_free_substrings(char**, const int);
 
 int main(int argc, char *argv[]) {
     /* we'll start after the first quote and chop off the end quote */
     const char *regex = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
-    // const char *subject = "Lloyd Rochester";
-    const char *subject = "John McCarthy";
+    const char *subject = "Lloyd Rochester";
+    // const char *subject = "John McCarthy";
     char **rows_of_substrings = NULL;
     int amount_of_matches = -1;
 
-    rows_of_substrings = run_regex(regex, subject, &amount_of_matches);
+    rows_of_substrings = my_regex_run(regex, subject, &amount_of_matches);
+    my_regex_print_results((const char **)rows_of_substrings, amount_of_matches);
+    my_regex_free_substrings(rows_of_substrings, amount_of_matches);
 
+    return 0;
+}
+
+void my_regex_free_substrings(char**rows_of_substrings, int amount_of_matches) {
+    for (int i = 0; i < amount_of_matches; ++i) {
+        free(rows_of_substrings[i]);
+        rows_of_substrings[i] = NULL;
+    }
+    free(rows_of_substrings);
+    rows_of_substrings = NULL;
+}
+
+void my_regex_print_results(const char **rows_of_substrings, const int amount_of_matches) {
     if (rows_of_substrings == NULL) {
         fprintf(stderr, "rows_of_substrings = NULL\n");
     } else {
@@ -27,18 +47,12 @@ int main(int argc, char *argv[]) {
         } else {
             for (int i = 0; i < amount_of_matches; ++i) {
                 printf("%d: %s\n", i, rows_of_substrings[i]);
-                free(rows_of_substrings[i]);
-                rows_of_substrings[i] = NULL;
             }
-            free(rows_of_substrings);
-            rows_of_substrings = NULL;
         }
     }
-
-    return 0;
 }
 
-char **run_regex(const char *regex, const char *subject, int *amount_of_matches) {
+char **my_regex_run(const char *regex, const char *subject, int *amount_of_matches) {
     /* for pcre_compile */
     pcre *re;
     const char *error;
