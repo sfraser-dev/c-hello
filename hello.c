@@ -127,32 +127,38 @@ int main() {
     // function pointers point to code, not data (points to start of executable code)
     // unlike normal pointers, we don't allocate / deallocate memory for function pointers
     // like normal pointers, can have an array of function pointers (like a switch statement)
-    void (*fun_ptr)(int, int);  // declare funtion pointer 
+    void (*fun_ptr)(int, int);  // declare funtion pointer
     fun_ptr = &simple_addition;
     (*fun_ptr)(10, 5);
     fun_ptr = &simple_subtraction;
     (*fun_ptr)(10, 5);
     fun_ptr = &simple_multiplication;
     (*fun_ptr)(10, 5);
-    fun_ptr = simple_division; // nb: name of function also holds its address
-    fun_ptr(10, 5); // nb: don't need to explicitly dereference a function pointer
+    fun_ptr = simple_division;  // nb: name of function also holds its address
+    fun_ptr(10, 5);             // nb: don't need to explicitly dereference a function pointer
     printf("\n");
 
     // declare and define an array of function pointers
     void (*fun_ptr_array[4])(int, int) = {simple_addition, simple_subtraction, simple_multiplication, simple_division};
 
     // array of function pointers is like a switch statement
-    fun_ptr_array[0](10,5); 
-    fun_ptr_array[1](10,5); 
-    fun_ptr_array[2](10,5); 
-    fun_ptr_array[3](10,5); 
+    fun_ptr_array[0](10, 5);
+    fun_ptr_array[1](10, 5);
+    fun_ptr_array[2](10, 5);
+    fun_ptr_array[3](10, 5);
     printf("\n");
 
     // function poiters cleaner code with typedefs
-    typedef void (*fun_ptr_type)(int, int); // typedef name will be fun_ptr_type
+    typedef void (*fun_ptr_type)(int, int);  // typedef name will be fun_ptr_type
     fun_ptr_type fp = simple_multiplication;
-    fp(10,5);
+    fp(10, 5);
+    printf("\n");
 
+    // very naughty: goto a label
+    goto my_label;
+    printf("this won't be printed\n");
+my_label:
+        printf("this will be printed\n");
 
     return 0;
 }
