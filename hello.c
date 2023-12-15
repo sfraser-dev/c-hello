@@ -10,6 +10,7 @@ void simple_addition(int a, int b);
 void simple_subtraction(int a, int b);
 void simple_multiplication(int a, int b);
 void simple_division(int a, int b);
+int recursion_sum(int n);
 
 int main() {
     // typedef of unnamed enum will have only a bool_t type
@@ -156,11 +157,22 @@ int main() {
 
     // very naughty: goto a label
     goto my_label;
-    printf("this won't be printed\n");
+    printf("goto: this won't be printed\n");
 my_label:
-        printf("this will be printed\n");
+    printf("goto: this will be printed\n");
+    printf("\n");
+
+    // calculate sum via recursion
+    printf("recursion sum = %d\n", recursion_sum(3));
 
     return 0;
+}
+
+int recursion_sum(int n) {
+    if (n == 0) {
+        return 0;
+    }
+    return n + recursion_sum(n - 1);
 }
 
 void simple_addition(int a, int b) { printf("%d+%d=%d\n", a, b, a + b); }
