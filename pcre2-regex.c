@@ -1,4 +1,4 @@
-// gcc -Wall pcre2-regex.c -o pcre2-regex -lpcre2-8 -lpcre2-16 -lpcre2-32
+// gcc -Wall pcre2-regex.c -o pcre2-regex.exe -lpcre2-8 -lpcre2-16 -lpcre2-32
 #define PCRE2_CODE_UNIT_WIDTH 8
 // #define PCRE2_CODE_UNIT_WIDTH 16
 // #define PCRE2_CODE_UNIT_WIDTH 32
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
         for (i = 0; i < rc; i++) {
             PCRE2_SPTR start = subject + ovector[2 * i];
             PCRE2_SIZE slen = ovector[2 * i + 1] - ovector[2 * i];
-            printf("%2zu: %.*s\n", i, (int)slen, (char *)start);
+            printf("%2d: %.*s\n", i, (int)slen, (char *)start);
         }
     } else if (rc < 0) {
         printf("No match\n");

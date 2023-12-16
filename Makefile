@@ -2,7 +2,7 @@ CC := clang
 SANITIZEFLAGS := -fsanitize=address
 # SANITIZEFLAGS :=
 CFLAGS := -g -Wall $(SANITIZEFLAGS)
-LDFLAGS := -lpcre $(SANITIZEFLAGS)
+LDFLAGS := $(SANITIZEFLAGS)
 INCLUDEDIRS := -I.
 RM := rm -f
 
@@ -12,7 +12,7 @@ all: a.out leak-free.exe leaky1.exe leaky2.exe \
 	leaky3.exe pcre-regex.exe
 
 a.out: hello.o
-	$(CC) $(LDFLAGS) $< -o $@
+	$(CC) -lpcre $(LDFLAGS) $< -o $@
 hello.o: hello.c
 	$(CC) $< $(CFLAGS) -c $(INCLUDEDIRS) -o $@
 
@@ -26,8 +26,12 @@ leaky3.exe: leaky3.c
 	$(CC) $< $(CFLAGS) $(INCLUDEDIRS) -o $@
 
 pcre-regex.exe: pcre-regex.o
-	$(CC) $(LDFLAGS) $< -o $@
+	$(CC) -lpcre $(LDFLAGS) $< -o $@
 pcre-regex.o: pcre-regex.c
+	$(CC) $< $(CFLAGS) -c $(INCLUDEDIRS) -o $@
+pcre2-regex.exe: pcre2-regex.o
+	$(CC) -lpcre2-8 $(LDFLAGS) $< -o $@
+pcre2-regex.o: pcre2-regex.c
 	$(CC) $< $(CFLAGS) -c $(INCLUDEDIRS) -o $@
 
 .PHONY: clean
