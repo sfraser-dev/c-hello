@@ -1,12 +1,22 @@
 # C code review
 
-Make / build with sanitizer on for Google's memory sanitizer checking.  
+## Memory checking: Google Sanitizer
 
-Valgrind checking done via:
+Can Make with sanitizer on for Google's memory checking. If compiled with
+this Google library, memory checking will be performed automatically when
+the program executes.
+
+## Memory checking: Valgrind
+
+Valgrind checking can be done via:
 
 ```bash
 perl valgrind.pl program-to-check.exe
 ```
 
-Valgrind will __not work__ if programs under scruitiny were built with Google's
+Valgrind will **not work** if programs under scruitiny were built with Google's
 sanitizer on.
+
+## Regular Expressions
+
+Implements regex in C using Philip Hazel's PCRE (Perl Compatible Regular Expressions) library.

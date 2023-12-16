@@ -156,9 +156,9 @@ int main() {
     printf("\n");
 
     // very naughty: goto a label
-    goto my_label;
+    goto my_naughty_label;
     printf("goto: this won't be printed\n");
-my_label:
+my_naughty_label:
     printf("goto: this will be printed\n");
     printf("\n");
 
