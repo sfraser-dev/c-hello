@@ -24,8 +24,6 @@ int main(int argc, char *argv[]) {
     const char *subject = "Lloyd Rochester";
 
     uint32_t options = 0;
-    pcre2_match_data *match_data;
-    uint32_t ovecsize = 128;
     char **rows_of_substrings = NULL;
     int amount_of_matches = -1;
 
@@ -56,15 +54,16 @@ char **my_compile_and_match(const char *pattern, const char *subject, uint32_t *
 
     char **rows_of_substrings = NULL;
 
-    re = pcre2_compile(pattern, pattern_size, *options, &errcode, &erroffset, NULL);
+    re = pcre2_compile((const unsigned char *)pattern, pattern_size, *options, &errcode, &erroffset, NULL);
     if (re == NULL) {
-        pcre2_get_error_message(errcode, buffer, 120);
+        //pcre2_get_error_message(errcode, buffer, 120);
+        pcre2_get_error_message(errcode, buffer, 128);
         fprintf(stderr, "%d\t%s\n", errcode, buffer);
         exit(1);
     }
 
     match_data = pcre2_match_data_create(ovecsize, NULL);
-    *amount_of_matches = pcre2_match(re, subject, subject_size, 0, *options, match_data, NULL);
+    *amount_of_matches = pcre2_match(re, (const unsigned char *)subject, subject_size, 0, *options, match_data, NULL);
 
     if (*amount_of_matches == 0) {
         fprintf(stderr, "offset vector too small: %d", *amount_of_matches);
@@ -72,26 +71,23 @@ char **my_compile_and_match(const char *pattern, const char *subject, uint32_t *
         ovector = pcre2_get_ovector_pointer(match_data);
         PCRE2_SIZE i;
         rows_of_substrings = malloc((*amount_of_matches) * sizeof(char *));
-        for (i = 0; i < *amount_of_matches; i++) {
-            PCRE2_SPTR start = subject + ovector[2 * i];
+        for (i = 0; i < *amount_of_matches; ++i) {
+            // get the matched string
+            PCRE2_SPTR start = (const unsigned char *)(subject + ovector[2 * i]);
+            // get the lenth of the matched string
             PCRE2_SIZE slen = ovector[2 * i + 1] - ovector[2 * i];
-            // .* means the formatted length is passed as an addition argumnet (slen)
-            printf("%2d: %.*s\n", i, (int)slen, (char *)start);
-            unsigned long my_slen = slen;
-            char *my_start = (char *)start;
-            printf("%lu\n", my_slen);
-            printf("%s\n", my_start);
+            printf("%.*s\n", slen+1, (const char *)start);
+            char captured_string[slen+1];
+            snprintf(captured_string, slen+1, "%s", (const char*)start); 
+            // save the matched string
             rows_of_substrings[i] = malloc(128 * sizeof(char));
-            strncpy(rows_of_substrings[i], (char*)start, 128);
-
+            strncpy(rows_of_substrings[i], captured_string, slen+1);
         }
     } else if (*amount_of_matches < 0) {
         printf("No match\n");
     }
-
     pcre2_match_data_free(match_data);
     pcre2_code_free(re);
-
     return rows_of_substrings;
 }
 
@@ -113,6 +109,7 @@ void my_regex_print_results(char **rows_of_substrings, const int amount_of_match
         } else {
             for (int i = 0; i < amount_of_matches; ++i) {
                 printf("%d: %s\n", i, rows_of_substrings[i]);
+                // printf("len = %lu\n", strlen(rows_of_substrings[i]));
             }
         }
     }
