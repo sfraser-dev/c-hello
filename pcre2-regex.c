@@ -1,4 +1,5 @@
 // gcc -Wall pcre2-regex.c -o pcre2-regex.exe -lpcre2-8 -lpcre2-16 -lpcre2-32
+#include <endian.h>
 #include <stdint.h>
 #include <sys/types.h>
 #define PCRE2_CODE_UNIT_WIDTH 8
@@ -14,9 +15,9 @@
 /* sudo apt-get -y install libpcre2-dev */
 /* These install pcre2 */
 
-char **my_compile_and_match(const char *, const char *, u_int32_t*, int *);
-void my_regex_free_substrings(char**rows_of_substrings, int amount_of_matches);
-void my_regex_print_results(const char **rows_of_substrings, const int amount_of_matches);
+char **my_compile_and_match(const char *, const char *, u_int32_t *, int *);
+void my_regex_free_substrings(char **rows_of_substrings, int amount_of_matches);
+void my_regex_print_results(char **rows_of_substrings, const int amount_of_matches);
 
 int main(int argc, char *argv[]) {
     const char *pattern = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
@@ -29,10 +30,10 @@ int main(int argc, char *argv[]) {
     int amount_of_matches = -1;
 
     rows_of_substrings = my_compile_and_match(pattern, subject, &options, &amount_of_matches);
-    printf("amount of matches = %d\n", amount_of_matches);
 
-    // my_regex_print_results((const char**)rows_of_substrings, amount_of_matches);
-    // my_regex_free_substrings(rows_of_substrings, amount_of_matches);
+    printf("\namount of matches = %d\n", amount_of_matches);
+    my_regex_print_results(rows_of_substrings, amount_of_matches);
+    my_regex_free_substrings(rows_of_substrings, amount_of_matches);
 
     return 0;
 }
@@ -53,7 +54,7 @@ char **my_compile_and_match(const char *pattern, const char *subject, uint32_t *
     size_t pattern_size = strlen(pattern);
     size_t subject_size = strlen(subject);
 
-    char** rows_of_substrings = NULL;
+    char **rows_of_substrings = NULL;
 
     re = pcre2_compile(pattern, pattern_size, *options, &errcode, &erroffset, NULL);
     if (re == NULL) {
@@ -65,23 +66,26 @@ char **my_compile_and_match(const char *pattern, const char *subject, uint32_t *
     match_data = pcre2_match_data_create(ovecsize, NULL);
     *amount_of_matches = pcre2_match(re, subject, subject_size, 0, *options, match_data, NULL);
 
-    if (*amount_of_matches== 0) {
+    if (*amount_of_matches == 0) {
         fprintf(stderr, "offset vector too small: %d", *amount_of_matches);
-    } else if (*amount_of_matches> 0) {
+    } else if (*amount_of_matches > 0) {
         ovector = pcre2_get_ovector_pointer(match_data);
         PCRE2_SIZE i;
-        rows_of_substrings = malloc((*amount_of_matches)*sizeof(char*));      
+        rows_of_substrings = malloc((*amount_of_matches) * sizeof(char *));
         for (i = 0; i < *amount_of_matches; i++) {
             PCRE2_SPTR start = subject + ovector[2 * i];
             PCRE2_SIZE slen = ovector[2 * i + 1] - ovector[2 * i];
+            // .* means the formatted length is passed as an addition argumnet (slen)
             printf("%2d: %.*s\n", i, (int)slen, (char *)start);
             unsigned long my_slen = slen;
-            char*my_start = (char*)start;
+            char *my_start = (char *)start;
             printf("%lu\n", my_slen);
-            printf("%s\n",my_start);
+            printf("%s\n", my_start);
             rows_of_substrings[i] = malloc(128 * sizeof(char));
+            strncpy(rows_of_substrings[i], (char*)start, 128);
+
         }
-    } else if (*amount_of_matches< 0) {
+    } else if (*amount_of_matches < 0) {
         printf("No match\n");
     }
 
@@ -91,7 +95,7 @@ char **my_compile_and_match(const char *pattern, const char *subject, uint32_t *
     return rows_of_substrings;
 }
 
-void my_regex_free_substrings(char**rows_of_substrings, int amount_of_matches) {
+void my_regex_free_substrings(char **rows_of_substrings, int amount_of_matches) {
     for (int i = 0; i < amount_of_matches; ++i) {
         free(rows_of_substrings[i]);
         rows_of_substrings[i] = NULL;
@@ -100,7 +104,7 @@ void my_regex_free_substrings(char**rows_of_substrings, int amount_of_matches) {
     rows_of_substrings = NULL;
 }
 
-void my_regex_print_results(const char **rows_of_substrings, const int amount_of_matches) {
+void my_regex_print_results(char **rows_of_substrings, const int amount_of_matches) {
     if (rows_of_substrings == NULL) {
         fprintf(stderr, "rows_of_substrings = NULL\n");
     } else {
