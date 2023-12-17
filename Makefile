@@ -1,6 +1,10 @@
-CC := clang
-SANITIZEFLAGS := -fsanitize=address
+# choose a sanitizer flag
+SANITIZEFLAGS := -fsanitize=address -fno-omit-frame-pointer
+# SANITIZEFLAGS := -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer
+# SANITIZEFLAGS := -fsanitize=undefined
 # SANITIZEFLAGS :=
+
+CC := clang
 CFLAGS := -g -Wall $(SANITIZEFLAGS)
 LDFLAGS := $(SANITIZEFLAGS)
 INCLUDEDIRS := -I.
@@ -8,10 +12,10 @@ RM := rm -f
 
 default: all
 
-all: a.out leak-free.exe leaky1.exe leaky2.exe \
+all: hello.exe leak-free.exe leaky1.exe leaky2.exe \
 	leaky3.exe pcre1-regex.exe pcre2-regex.exe
 
-a.out: hello.o
+hello.exe: hello.o
 	$(CC) -lpcre $(LDFLAGS) $< -o $@
 hello.o: hello.c
 	$(CC) $< $(CFLAGS) -c $(INCLUDEDIRS) -o $@
