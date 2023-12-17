@@ -16,7 +16,7 @@ all: hello.exe leak-free.exe leaky1.exe leaky2.exe \
 	leaky3.exe pcre1-regex.exe pcre2-regex.exe
 
 hello.exe: hello.o
-	$(CC) -lpcre $(LDFLAGS) $< -o $@
+	$(CC) -lpcre -lpcre2-8 $(LDFLAGS) $< -o $@
 hello.o: hello.c
 	$(CC) $< $(CFLAGS) -c $(INCLUDEDIRS) -o $@
 

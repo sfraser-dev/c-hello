@@ -1,4 +1,7 @@
+#define PCRE2_CODE_UNIT_WIDTH 8
+
 #include <pcre.h>
+#include <pcre2.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +9,9 @@
 char **my_regex_pcre1_run(const char *regex, const char *subject, int *amount_of_matches);
 void my_regex_pcre1_print_results(const char **rows_of_substrings, const int amount_of_matches);
 void my_regex_pcre1_free_substrings(char **rows_of_substrings, int amount_of_matches);
+char **my_regex_pcre2_compile_and_match(const char *, const char *, int *);
+void my_regex_pcre2_print_results(const char **, const int);
+void my_regex_pcre2_free_substrings(char **, const int);
 void simple_addition(int a, int b);
 void simple_subtraction(int a, int b);
 void simple_multiplication(int a, int b);
@@ -79,7 +85,7 @@ int main() {
     }
     printf("\n");
 
-    // regex: C regex using the pcre library
+    // regex pcre1: C regex using the pcre library
     const char *regex = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
     const char *subject = "Lloyd Rochester";
     // const char *subject = "John McCarthy";
@@ -90,7 +96,7 @@ int main() {
     my_regex_pcre1_print_results((const char **)rows_of_substrings, amount_of_matches);
     my_regex_pcre1_free_substrings(rows_of_substrings, amount_of_matches);
 
-    // regex: getting user input from fgets() and checking / matching it with regex
+    // regex pcre1: getting user input from fgets() and checking / matching it with regex pcre1
     printf("enter the following: FIRSTNAME SURNAME AGE: ");
     fgets(str_in3, sizeof(str_in3), stdin);
     printf("str_in3 = %s", str_in3);
@@ -101,6 +107,16 @@ int main() {
     rows_of_substrings2 = my_regex_pcre1_run(regex2, (const char *)str_in3, &amount_of_matches2);
     my_regex_pcre1_print_results((const char **)rows_of_substrings2, amount_of_matches2);
     my_regex_pcre1_free_substrings(rows_of_substrings2, amount_of_matches2);
+    printf("\n");
+
+    const char *pattern_pcre2 = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
+    const char *subject2_pcre2 = "Lloyd Rochester";
+    char **rows_of_captures_pcre2 = NULL;
+    int amount_of_matches_pcre2 = -1;
+    rows_of_captures_pcre2 = my_regex_pcre2_compile_and_match(pattern_pcre2, subject2_pcre2, &amount_of_matches_pcre2);
+    printf("\namount of matches pcre2 = %d\n", amount_of_matches_pcre2);
+    my_regex_pcre2_print_results((const char **)rows_of_captures_pcre2, amount_of_matches_pcre2);
+    my_regex_pcre2_free_substrings(rows_of_captures_pcre2, amount_of_matches_pcre2);
     printf("\n");
 
     // character ASCII values
@@ -242,4 +258,86 @@ char **my_regex_pcre1_run(const char *regex, const char *subject, int *amount_of
     pcre_free(re);
 
     return rows_of_substrings;
+}
+
+char **my_regex_pcre2_compile_and_match(const char *pattern, const char *subject, int *amount_of_matches) {
+    /* for pcre2_compile */
+    pcre2_code *re;
+    PCRE2_SIZE erroffset;
+    int errcode;
+    PCRE2_UCHAR8 buffer[128];
+
+    /* for pcre2_match */
+    PCRE2_SIZE *ovector;
+    pcre2_match_data *match_data;
+    uint32_t ovecsize = 128;
+
+    uint32_t options = 0;
+
+    size_t pattern_size = strlen(pattern);
+    size_t subject_size = strlen(subject);
+
+    char **rows_of_captures = NULL;
+
+    // compile the regex
+    re = pcre2_compile((const unsigned char *)pattern, pattern_size, options, &errcode, &erroffset, NULL);
+    if (re == NULL) {
+        pcre2_get_error_message(errcode, buffer, 128);
+        fprintf(stderr, "%d\t%s\n", errcode, buffer);
+        exit(EXIT_FAILURE);
+    }
+
+    // apply the regex
+    match_data = pcre2_match_data_create(ovecsize, NULL);
+    *amount_of_matches = pcre2_match(re, (const unsigned char *)subject, subject_size, 0, options, match_data, NULL);
+
+    if (*amount_of_matches == 0) {
+        fprintf(stderr, "offset vector too small: %d", *amount_of_matches);
+    } else if (*amount_of_matches > 0) {
+        ovector = pcre2_get_ovector_pointer(match_data);
+        PCRE2_SIZE i;
+        rows_of_captures = malloc((*amount_of_matches) * sizeof(char *));
+        for (i = 0; i < *amount_of_matches; ++i) {
+            // start position of capture
+            PCRE2_SPTR start = (const unsigned char *)(subject + ovector[2 * i]);
+            // lenth of capture
+            PCRE2_SIZE slen = ovector[2 * i + 1] - ovector[2 * i];
+            // printf("%.*s\n", (int)slen, (const char *)start); // .* means format length passed as an arg (not
+            // hardcoded)
+            int amount_of_bytes_to_write_and_nul_terminator = slen + 1;
+            char captured_string[amount_of_bytes_to_write_and_nul_terminator];
+            snprintf(captured_string, amount_of_bytes_to_write_and_nul_terminator, "%s", (const char *)start);
+            // save the capture to a 2d array of captures
+            rows_of_captures[i] = malloc(128 * sizeof(char));
+            strncpy(rows_of_captures[i], captured_string, slen + 1);
+        }
+    } else if (*amount_of_matches < 0) {
+        printf("No match\n");
+    }
+    pcre2_match_data_free(match_data);
+    pcre2_code_free(re);
+    return rows_of_captures;
+}
+
+void my_regex_pcre2_free_substrings(char **rows_of_captures, const int amount_of_matches) {
+    for (int i = 0; i < amount_of_matches; ++i) {
+        free(rows_of_captures[i]);
+        rows_of_captures[i] = NULL;
+    }
+    free(rows_of_captures);
+    rows_of_captures = NULL;
+}
+
+void my_regex_pcre2_print_results(const char **rows_of_captures, const int amount_of_matches) {
+    if (rows_of_captures == NULL) {
+        fprintf(stderr, "rows_of_captures = NULL\n");
+    } else {
+        if (amount_of_matches <= 0) {
+            fprintf(stderr, "amount_of_matches <= 0\n");
+        } else {
+            for (int i = 0; i < amount_of_matches; ++i) {
+                printf("%d: %s (length %lu)\n", i, rows_of_captures[i], strlen(rows_of_captures[i]));
+            }
+        }
+    }
 }
