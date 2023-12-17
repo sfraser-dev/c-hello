@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-char **my_regex_run(const char *regex, const char *subject, int *amount_of_matches);
-void my_regex_print_results(const char **rows_of_substrings, const int amount_of_matches);
-void my_regex_free_substrings(char **rows_of_substrings, int amount_of_matches);
+char **my_regex_pcre1_run(const char *regex, const char *subject, int *amount_of_matches);
+void my_regex_pcre1_print_results(const char **rows_of_substrings, const int amount_of_matches);
+void my_regex_pcre1_free_substrings(char **rows_of_substrings, int amount_of_matches);
 void simple_addition(int a, int b);
 void simple_subtraction(int a, int b);
 void simple_multiplication(int a, int b);
@@ -86,9 +86,9 @@ int main() {
     char **rows_of_substrings = NULL;
     int amount_of_matches = -1;
     printf("regex in C...\n");
-    rows_of_substrings = my_regex_run(regex, subject, &amount_of_matches);
-    my_regex_print_results((const char **)rows_of_substrings, amount_of_matches);
-    my_regex_free_substrings(rows_of_substrings, amount_of_matches);
+    rows_of_substrings = my_regex_pcre1_run(regex, subject, &amount_of_matches);
+    my_regex_pcre1_print_results((const char **)rows_of_substrings, amount_of_matches);
+    my_regex_pcre1_free_substrings(rows_of_substrings, amount_of_matches);
 
     // regex: getting user input from fgets() and checking / matching it with regex
     printf("enter the following: FIRSTNAME SURNAME AGE: ");
@@ -98,9 +98,9 @@ int main() {
     const char *regex2 = "^(\\w+)\\b\\s+\\b(\\w+)\\b\\s+\\b(\\d+)$";
     char **rows_of_substrings2 = NULL;
     int amount_of_matches2 = -1;
-    rows_of_substrings2 = my_regex_run(regex2, (const char *)str_in3, &amount_of_matches2);
-    my_regex_print_results((const char **)rows_of_substrings2, amount_of_matches2);
-    my_regex_free_substrings(rows_of_substrings2, amount_of_matches2);
+    rows_of_substrings2 = my_regex_pcre1_run(regex2, (const char *)str_in3, &amount_of_matches2);
+    my_regex_pcre1_print_results((const char **)rows_of_substrings2, amount_of_matches2);
+    my_regex_pcre1_free_substrings(rows_of_substrings2, amount_of_matches2);
     printf("\n");
 
     // character ASCII values
@@ -183,7 +183,7 @@ void simple_multiplication(int a, int b) { printf("%d*%d=%d\n", a, b, a * b); }
 
 void simple_division(int a, int b) { printf("%d/%d=%.1f\n", a, b, ((float)a) / b); }
 
-void my_regex_free_substrings(char **rows_of_substrings, int amount_of_matches) {
+void my_regex_pcre1_free_substrings(char **rows_of_substrings, int amount_of_matches) {
     for (int i = 0; i < amount_of_matches; ++i) {
         free(rows_of_substrings[i]);
         rows_of_substrings[i] = NULL;
@@ -192,7 +192,7 @@ void my_regex_free_substrings(char **rows_of_substrings, int amount_of_matches) 
     rows_of_substrings = NULL;
 }
 
-void my_regex_print_results(const char **rows_of_substrings, const int amount_of_matches) {
+void my_regex_pcre1_print_results(const char **rows_of_substrings, const int amount_of_matches) {
     if (rows_of_substrings == NULL) {
         fprintf(stderr, "rows_of_substrings = NULL\n");
     } else {
@@ -206,7 +206,7 @@ void my_regex_print_results(const char **rows_of_substrings, const int amount_of
     }
 }
 
-char **my_regex_run(const char *regex, const char *subject, int *amount_of_matches) {
+char **my_regex_pcre1_run(const char *regex, const char *subject, int *amount_of_matches) {
     /* for pcre_compile */
     pcre *re;
     const char *error;
