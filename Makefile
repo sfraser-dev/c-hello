@@ -9,7 +9,7 @@ RM := rm -f
 default: all
 
 all: a.out leak-free.exe leaky1.exe leaky2.exe \
-	leaky3.exe pcre-regex.exe pcre2-regex.exe
+	leaky3.exe pcre1-regex.exe pcre2-regex.exe
 
 a.out: hello.o
 	$(CC) -lpcre $(LDFLAGS) $< -o $@
@@ -25,9 +25,9 @@ leaky2.exe: leaky2.c
 leaky3.exe: leaky3.c
 	$(CC) $< $(CFLAGS) $(INCLUDEDIRS) -o $@
 
-pcre-regex.exe: pcre-regex.o
+pcre1-regex.exe: pcre1-regex.o
 	$(CC) -lpcre $(LDFLAGS) $< -o $@
-pcre-regex.o: pcre-regex.c
+pcre1-regex.o: pcre1-regex.c
 	$(CC) $< $(CFLAGS) -c $(INCLUDEDIRS) -o $@
 pcre2-regex.exe: pcre2-regex.o
 	$(CC) -lpcre2-8 $(LDFLAGS) $< -o $@
