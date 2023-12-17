@@ -35,16 +35,33 @@ int main() {
     enum vals eend = end;
     printf("next3 = %d\n", eend);
 
+    // very bad: no space for implicit nul terminator, will not behave like a string!
+    // very bad: char bad_string_array[5] = "Harry";  
+    // very bad: printf("%s", bad_string_array);
+    //
     // text-length plus one for implicitly added nul character '\0'
-    char name_array_fixed[6] = "Harry";
-    int size = (strlen(name_array_fixed) + 1) * sizeof(char);
-    char *name_ptr_copy = malloc(size);
-    strcpy(name_ptr_copy, name_array_fixed);
-    printf("there are %lu letters in %s\n", strlen(name_array_fixed), name_array_fixed);
-    printf("copying %s\n", name_ptr_copy);
+    char name_array[6] = "Harry";
+    char *name_ptr_same = name_array;
+    int name_array_fixed_length = (strlen(name_array) + 1) * sizeof(char);
+    // calloc is continuous memory allocation initialised to zero
+    char *name_ptr_new = calloc(name_array_fixed_length, sizeof(char));
+    strcpy(name_ptr_new, name_array);
+    printf("there are %lu letters in %s\n", strlen(name_array), name_array);
+    printf("copying %s\n", name_ptr_new);
+    *(name_ptr_same+1) = 'Z';
+    printf("%s\n", name_array);
     // clean up malloc'd memory
-    free(name_ptr_copy);
-    name_ptr_copy = NULL;
+    free(name_ptr_new);
+    name_ptr_new= NULL;
+    name_ptr_same = NULL;
+
+    // calloc initialises an array to all zeros
+    int csize = 5;
+    int *calloc_arr = calloc(csize, sizeof(int));
+    for (int i=0; i<csize; ++i){
+        printf("%d ", calloc_arr[i]);
+    }
+    printf("\n");
 
     // string of unkown length, count until '\0'
     char *name_ptr_unknown_length = "Poindexter";
@@ -58,13 +75,22 @@ int main() {
     }
     printf("there are %d letters in %s\n", len, name_ptr_unknown_length);
 
-    // getting user input via fgets() and then capturing and checking it with sscanf()
+    // fgets(): (file get string) reads input until max-size bytes reached 
+    //          or '\n' reached. use for reading from "file" stdin (checks size)
+    // sscanf(): (string scan) reads formatted data from a character string (into a variable)
+    // snprintf(): writes formatted data to a character string (checks size)
+    // strncpy(): copy one string to another string (checks size)
+    // strlen(): return the length of a string in bytes (not including nul terminator)
+    // strncmp(): compare the first n bytes of two striangs (checks size)
+    // strncap(): concatenate a string onto another up to n bytes (checks size)
+    //
+    // fileIO: getting user input via fgets() and then capturing and checking it with sscanf()
     char str_in1[30], str_in2[30], str_in3[30];
     int cap_num, ret_val;
-    printf("enter your age: "); /* best to not use scanf, leaves '\n' in buffer */
+    printf("enter your age: "); /* best NOT to use scanf, it leaves '\n' in buffer */
     // right to left, read from stdin to str_in1
     fgets(str_in1, sizeof((str_in1)), stdin);
-    // left to right, str_in1 is captured / formatted (%x) into f_num
+    // left to right, str_in1 is captured / formatted (%d) into cap_num
     ret_val = sscanf(str_in1, "%d", &cap_num);
     if (ret_val > 0) {
         printf("sscanf formatted %d items.\nyour age is %d\n", ret_val, cap_num);
@@ -85,6 +111,20 @@ int main() {
     }
     printf("\n");
 
+    // strncmp and strncat
+    char *tests1 = "elevenchars";    /* auto adds nul terminator */
+    char tests2[12] = "elevenchars"; /* need to declare enough space for nul terminator*/
+    int rets = strncmp(tests1,tests2,12);
+    if (rets==0) {
+        printf("strncmp match!\n");
+    } else {
+        printf("strncmp no match!\n");
+    }
+    char dest[18] = "6chars";
+    strncat(dest, tests1, 12);
+    printf("strncat: %s\n",dest);
+
+
     // regex pcre1: C regex using the pcre library
     const char *regex = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
     const char *subject = "Lloyd Rochester";
@@ -96,7 +136,7 @@ int main() {
     my_regex_pcre1_print_results((const char **)rows_of_substrings, amount_of_matches);
     my_regex_pcre1_free_substrings(rows_of_substrings, amount_of_matches);
 
-    // regex pcre1: getting user input from fgets() and checking / matching it with regex pcre1
+    // regex pcre1 fileIO: getting user input from fgets() and checking / matching it with regex pcre1
     printf("enter the following: FIRSTNAME SURNAME AGE: ");
     fgets(str_in3, sizeof(str_in3), stdin);
     printf("str_in3 = %s", str_in3);
