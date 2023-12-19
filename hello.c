@@ -18,8 +18,8 @@ void simple_subtraction(int a, int b);
 void simple_multiplication(int a, int b);
 void simple_division(int a, int b);
 int recursion_sum(int n);
-void my_to_upper_case (char*, int);
-void my_to_lower_case (char*, int);
+void my_strnupr(char*, int);
+void my_strnlwr(char*, int);
 
 int main() {
     // typedef of unnamed enum will have only a bool_t type
@@ -80,7 +80,7 @@ int main() {
     }
     printf("there are %d letters in %s\n", len, name_ptr_unknown_length);
 
-    // fgets(): (file get string) reads input until max-size bytes reached 
+    // fgets(): (file get string) reads input until max-size bytes reached
     //          or '\n' reached. use for reading from "file" stdin (checks size)
     // sscanf(): (string scan) reads formatted data from a character string (into a variable)
     // snprintf(): writes formatted data to a character string (checks size)
@@ -88,8 +88,8 @@ int main() {
     // strlen(): return the length of a string in bytes (not including nul terminator)
     // strncmp(): compare the first n bytes of two striangs (checks size)
     // strncap(): concatenate a string onto another up to n bytes (checks size)
-    // strlwr(): string to lower case
-    // strupr(): string to upper case
+    // strlwr(): to lowercase no longer available, I  wrote my own verion my_strnlwr
+    // strupr(): to uppercase no longer available, I  wrote my own verion my_strnupr
     //
     // fileIO: getting user input via fgets() and then capturing and checking it with sscanf()
     char str_in1[30], str_in2[30], str_in3[30];
@@ -134,10 +134,10 @@ int main() {
     // to upper and lower case
     char a_lower_case_sentence[] = "this used to have all lowercase letters";
     char a_upper_case_sentence[] = "THIS USED TO HAVE ALL CAPITAL LETTERS";
-    //my_to_upper_case(a_lower_case_sentence, strlen(a_lower_case_sentence));
-    //my_to_lower_case(a_upper_case_sentence, strlen(a_upper_case_sentence));
-    my_to_upper_case(a_lower_case_sentence, 3);
-    my_to_lower_case(a_upper_case_sentence, 3);
+    //my_strnupr(a_lower_case_sentence, strlen(a_lower_case_sentence));
+    //my_strnlwr(a_upper_case_sentence, strlen(a_upper_case_sentence));
+    my_strnupr(a_lower_case_sentence, 300);
+    my_strnlwr(a_upper_case_sentence, 300);
     printf("%s\n",a_lower_case_sentence);
     printf("%s\n",a_upper_case_sentence);
 
@@ -398,7 +398,7 @@ void my_regex_pcre2_print_results(const char **rows_of_captures, const int amoun
     }
 }
 
-void my_to_upper_case(char *str, int max_bytes_to_change){
+void my_strnupr(char *str, int max_bytes_to_change){
     int i = 0;
     while (*(str+i) != '\0') {
         *(str+i) = toupper(*(str+i));
@@ -409,7 +409,7 @@ void my_to_upper_case(char *str, int max_bytes_to_change){
     }
 }
 
-void my_to_lower_case(char *str, int max_bytes_to_change){
+void my_strnlwr(char *str, int max_bytes_to_change){
     int i = 0;
     while (*(str+i) != '\0') {
         *(str+i) = tolower(*(str+i));
