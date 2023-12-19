@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 char **my_regex_pcre1_run(const char *regex, const char *subject, int *amount_of_matches);
 void my_regex_pcre1_print_results(const char **rows_of_substrings, const int amount_of_matches);
@@ -17,6 +18,8 @@ void simple_subtraction(int a, int b);
 void simple_multiplication(int a, int b);
 void simple_division(int a, int b);
 int recursion_sum(int n);
+void my_to_upper_case (char*, int);
+void my_to_lower_case (char*, int);
 
 int main() {
     // typedef of unnamed enum will have only a bool_t type
@@ -62,6 +65,8 @@ int main() {
         printf("%d ", calloc_arr[i]);
     }
     printf("\n");
+    free(calloc_arr);
+    calloc_arr = NULL;
 
     // string of unkown length, count until '\0'
     char *name_ptr_unknown_length = "Poindexter";
@@ -83,6 +88,8 @@ int main() {
     // strlen(): return the length of a string in bytes (not including nul terminator)
     // strncmp(): compare the first n bytes of two striangs (checks size)
     // strncap(): concatenate a string onto another up to n bytes (checks size)
+    // strlwr(): string to lower case
+    // strupr(): string to upper case
     //
     // fileIO: getting user input via fgets() and then capturing and checking it with sscanf()
     char str_in1[30], str_in2[30], str_in3[30];
@@ -123,7 +130,16 @@ int main() {
     char dest[18] = "6chars";
     strncat(dest, tests1, 12);
     printf("strncat: %s\n",dest);
-
+    
+    // to upper and lower case
+    char a_lower_case_sentence[] = "this used to have all lowercase letters";
+    char a_upper_case_sentence[] = "THIS USED TO HAVE ALL CAPITAL LETTERS";
+    //my_to_upper_case(a_lower_case_sentence, strlen(a_lower_case_sentence));
+    //my_to_lower_case(a_upper_case_sentence, strlen(a_upper_case_sentence));
+    my_to_upper_case(a_lower_case_sentence, 3);
+    my_to_lower_case(a_upper_case_sentence, 3);
+    printf("%s\n",a_lower_case_sentence);
+    printf("%s\n",a_upper_case_sentence);
 
     // regex pcre1: C regex using the pcre library
     const char *regex = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
@@ -378,6 +394,28 @@ void my_regex_pcre2_print_results(const char **rows_of_captures, const int amoun
             for (int i = 0; i < amount_of_matches; ++i) {
                 printf("%d: %s (length %lu)\n", i, rows_of_captures[i], strlen(rows_of_captures[i]));
             }
+        }
+    }
+}
+
+void my_to_upper_case(char *str, int max_bytes_to_change){
+    int i = 0;
+    while (*(str+i) != '\0') {
+        *(str+i) = toupper(*(str+i));
+        i++;
+        if (i == max_bytes_to_change) {
+            break;
+        }
+    }
+}
+
+void my_to_lower_case(char *str, int max_bytes_to_change){
+    int i = 0;
+    while (*(str+i) != '\0') {
+        *(str+i) = tolower(*(str+i));
+        i++;
+        if (i == max_bytes_to_change) {
+            break;
         }
     }
 }
