@@ -1,11 +1,37 @@
 #define PCRE2_CODE_UNIT_WIDTH 8
 
+#include <ctype.h>
 #include <pcre.h>
 #include <pcre2.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+
+// struct with typedef. without a typedef, we'd have to instantiate via:
+// "struct person p1"
+// the person tag is useless by itself, the type must be referrred to as
+// "struct person". with typedef, we're essentially doing:
+// typedef "struct person" person
+// we can now instantiate instances of the structure using only:
+// person p1 
+typedef struct person {
+    char name[50];
+    int age;
+    float height_m;
+} person;
+
+// union
+typedef struct _animal_struct {
+    int legs;
+    int eyes;
+    float weight;
+} animal_struct;
+
+typedef union _animal_union {
+    int legs;
+    int eyes;
+    float weight;
+} animal_union;
 
 char **my_regex_pcre1_run(const char *regex, const char *subject, int *amount_of_matches);
 void my_regex_pcre1_print_results(const char **rows_of_substrings, const int amount_of_matches);
@@ -18,16 +44,74 @@ void simple_subtraction(int a, int b);
 void simple_multiplication(int a, int b);
 void simple_division(int a, int b);
 int recursion_sum(int n);
-void my_strnupr(char*, int);
-void my_strnlwr(char*, int);
+void my_strnupr(char *, int);
+void my_strnlwr(char *, int);
+void my_sort_strings_alphabetically();
+void my_copy_string();
+void print_struct_person_by_ref(person *);
+void print_struct_person_by_value(person);
 
 int main() {
-    // typedef of unnamed enum will have only a bool_t type
+    // struct by value for jordan
+    person m_jordan;
+    strncpy(m_jordan.name, "Michael Jordan", 50);
+    m_jordan.age = 66;
+    m_jordan.height_m = 2.10;
+    print_struct_person_by_value(m_jordan);
+
+    // struct by reference for obama with dynamically allocated memory
+    person *b_obama = (person *)calloc(1, sizeof(person));
+    strncpy(b_obama->name, "Barack Obama", 50);
+    b_obama->age = 59;
+    b_obama->height_m = 1.82;
+    print_struct_person_by_ref(b_obama);
+    free(b_obama);
+    b_obama = NULL;
+
+    // now print jordan by reference
+    print_struct_person_by_ref(&m_jordan);
+
+    // struct by value for messi with initialisation
+    person l_messi = {.name = "Lionel Messi", .age = 37, .height_m = 1.68f};
+    print_struct_person_by_value(l_messi);
+
+    // struct by value for musk with initialisation
+    person e_musk;
+    e_musk = (person){"Elon Musk", 53, 1.84f};
+    print_struct_person_by_value(e_musk);
+
+    // struct by reference for einstein with dynamic memory allocation and initialisation
+    person *a_einstein = (person *)malloc(1 * sizeof(person));
+    *a_einstein = (person){"Albert Einstein", 26, 1.77f};
+    print_struct_person_by_ref(a_einstein);
+    free(a_einstein);
+    a_einstein = NULL;
+
+    // struct by value for ronaldo with initialisation AND similtaneous ptr declaration
+    person *c_ronaldo_ptr, c_ronaldo = {.name = "Cristiano Ronaldo", .age = 39, .height_m = 1.91f};
+    c_ronaldo_ptr = &c_ronaldo;
+    print_struct_person_by_ref(c_ronaldo_ptr);
+
+    // struct by reference for curie with dynamic memory allocation and initialisation
+    person *m_curie = (person *)calloc(1, sizeof(person));
+    *m_curie = (person){.name = "Marie Curie", .age = 43, .height_m = 1.53f};
+    print_struct_person_by_value(*m_curie);
+    free(m_curie);
+    m_curie = NULL;
+    printf("\n");
+
+    // members of a union share the same memory
+    animal_struct dog_struct;
+    animal_union dog_union;
+    printf("size of dog struct is: %lu\n", sizeof(dog_struct));
+    printf("size of dog union is: %lu\n", sizeof(dog_union));
+
+    // enum: typedef of unnamed enum will have only a bool_t type
     typedef enum { FALSE, TRUE } bool_t;
     bool_t falsey = FALSE;
     !(FALSE) ? printf("falsey = %d\n", falsey) : 1;
 
-    // enum simple
+    // enum: simple
     enum vals { start = 10, next1, next2, end };
     enum vals ebegin = start;
     printf("start = %d\n", ebegin);
@@ -38,8 +122,9 @@ int main() {
     enum vals eend = end;
     printf("next3 = %d\n", eend);
 
+    // strings
     // very bad: no space for implicit nul terminator, will not behave like a string!
-    // very bad: char bad_string_array[5] = "Harry";  
+    // very bad: char bad_string_array[5] = "Harry";
     // very bad: printf("%s", bad_string_array);
     //
     // text-length plus one for implicitly added nul character '\0'
@@ -51,17 +136,17 @@ int main() {
     strcpy(name_ptr_new, name_array);
     printf("there are %lu letters in %s\n", strlen(name_array), name_array);
     printf("copying %s\n", name_ptr_new);
-    *(name_ptr_same+1) = 'Z';
+    *(name_ptr_same + 1) = 'Z';
     printf("%s\n", name_array);
     // clean up malloc'd memory
     free(name_ptr_new);
-    name_ptr_new= NULL;
+    name_ptr_new = NULL;
     name_ptr_same = NULL;
 
     // calloc initialises an array to all zeros
     int csize = 5;
     int *calloc_arr = calloc(csize, sizeof(int));
-    for (int i=0; i<csize; ++i){
+    for (int i = 0; i < csize; ++i) {
         printf("%d ", calloc_arr[i]);
     }
     printf("\n");
@@ -87,15 +172,16 @@ int main() {
     // strncpy(): copy one string to another string (checks size)
     // strlen(): return the length of a string in bytes (not including nul terminator)
     // strncmp(): compare the first n bytes of two striangs (checks size)
-    // strncap(): concatenate a string onto another up to n bytes (checks size)
-    // strlwr(): to lowercase no longer available, I  wrote my own verion my_strnlwr
-    // strupr(): to uppercase no longer available, I  wrote my own verion my_strnupr
+    // strncat(): concatenate a string onto another up to n bytes (checks size)
+    // strlwr(): to lowercase no longer available, I wrote my own verion my_strnlwr
+    // strupr(): to uppercase no longer available, I wrote my own verion my_strnupr
     //
-    // fileIO: getting user input via fgets() and then capturing and checking it with sscanf()
+    // fileIO: getting user input via fgets() capturing it in a string then parsing it with sscanf()
     char str_in1[30], str_in2[30], str_in3[30];
     int cap_num, ret_val;
-    printf("enter your age: "); /* best NOT to use scanf, it leaves '\n' in buffer */
-    // right to left, read from stdin to str_in1
+    /* best NOT to use scanf when reading user input, leaves '\n' in buffer */
+    printf("enter your age: ");
+    // much better to use fgets. right to left, read from stdin to str_in1
     fgets(str_in1, sizeof((str_in1)), stdin);
     // left to right, str_in1 is captured / formatted (%d) into cap_num
     ret_val = sscanf(str_in1, "%d", &cap_num);
@@ -104,8 +190,9 @@ int main() {
     } else if (ret_val == 0) {
         printf("sscanf didn't format any items\n");
     } else {
-        printf("sscanf error\n");
+        printf("sscanf formatting error\n");
     }
+    // capturing user inputting their name to a string then parsing it with sscanf()
     printf("now enter your name: ");
     fgets(str_in2, sizeof(str_in2), stdin);
     ret_val = sscanf(str_in2, "%s", str_in2);
@@ -121,25 +208,44 @@ int main() {
     // strncmp and strncat
     char *tests1 = "elevenchars";    /* auto adds nul terminator */
     char tests2[12] = "elevenchars"; /* need to declare enough space for nul terminator*/
-    int rets = strncmp(tests1,tests2,12);
-    if (rets==0) {
+    int rets = strncmp(tests1, tests2, 12);
+    if (rets == 0) {
         printf("strncmp match!\n");
     } else {
         printf("strncmp no match!\n");
     }
     char dest[18] = "6chars";
     strncat(dest, tests1, 12);
-    printf("strncat: %s\n",dest);
-    
+    printf("strncat: %s\n", dest);
+
     // to upper and lower case
     char a_lower_case_sentence[] = "this used to have all lowercase letters";
     char a_upper_case_sentence[] = "THIS USED TO HAVE ALL CAPITAL LETTERS";
-    //my_strnupr(a_lower_case_sentence, strlen(a_lower_case_sentence));
-    //my_strnlwr(a_upper_case_sentence, strlen(a_upper_case_sentence));
-    my_strnupr(a_lower_case_sentence, 300);
-    my_strnlwr(a_upper_case_sentence, 300);
-    printf("%s\n",a_lower_case_sentence);
-    printf("%s\n",a_upper_case_sentence);
+    char wee_een[] = "this is a wee een";
+    char big_een[] = "THIS IS A BIG EEN";
+    my_strnupr(a_lower_case_sentence, strlen(a_lower_case_sentence));
+    my_strnlwr(a_upper_case_sentence, strlen(a_upper_case_sentence));
+    my_strnupr(wee_een, 3);
+    my_strnlwr(big_een, 3);
+    printf("%s\n", a_lower_case_sentence);
+    printf("%s\n", a_upper_case_sentence);
+    printf("%s\n", wee_een);
+    printf("%s\n", big_een);
+    printf("\n");
+
+    // using strncmp() to sort strings
+    my_sort_strings_alphabetically();
+
+    // implementing my own version of strncpy()
+    my_copy_string();
+
+    // character ASCII values
+    printf("ASCII 'A' = %d\n", 'A');
+    printf("ASCII 'a' = %d\n", 'a');
+    printf("ASCII 'Z' = %d\n", 'Z');
+    printf("ASCII 'z' = %d\n", 'z');
+    printf("ASCII '0' = %d\n", '0');
+    printf("ASCII '9' = %d\n", '9');
 
     // regex pcre1: C regex using the pcre library
     const char *regex = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
@@ -165,6 +271,7 @@ int main() {
     my_regex_pcre1_free_substrings(rows_of_substrings2, amount_of_matches2);
     printf("\n");
 
+    // regex: pcre2
     const char *pattern_pcre2 = "^([A-Z][a-z]+) ([A-Z][a-z]+)$";
     const char *subject2_pcre2 = "Lloyd Rochester";
     char **rows_of_captures_pcre2 = NULL;
@@ -174,14 +281,6 @@ int main() {
     my_regex_pcre2_print_results((const char **)rows_of_captures_pcre2, amount_of_matches_pcre2);
     my_regex_pcre2_free_substrings(rows_of_captures_pcre2, amount_of_matches_pcre2);
     printf("\n");
-
-    // character ASCII values
-    printf("ASCII 'A' = %d\n", 'A');
-    printf("ASCII 'a' = %d\n", 'a');
-    printf("ASCII 'Z' = %d\n", 'Z');
-    printf("ASCII 'z' = %d\n", 'z');
-    printf("ASCII '0' = %d\n", '0');
-    printf("ASCII '9' = %d\n", '9');
 
     // bitwise operations
     short _2 = 2;              // 010
@@ -238,6 +337,22 @@ my_naughty_label:
     printf("recursion sum = %d\n", recursion_sum(3));
 
     return 0;
+}
+
+void print_struct_person_by_value(person p) {
+    printf("person_struct:\n");
+    printf("%s\n", p.name);
+    printf("%d\n", p.age);
+    printf("%2.2f\n", p.height_m);
+    printf("\n");
+}
+
+void print_struct_person_by_ref(person *ptr) {
+    printf("person_struct_ptr:\n");
+    printf("%s\n", ptr->name);
+    printf("%d\n", ptr->age);
+    printf("%2.2f\n", ptr->height_m);
+    printf("\n");
 }
 
 int recursion_sum(int n) {
@@ -398,10 +513,10 @@ void my_regex_pcre2_print_results(const char **rows_of_captures, const int amoun
     }
 }
 
-void my_strnupr(char *str, int max_bytes_to_change){
+void my_strnupr(char *str, int max_bytes_to_change) {
     int i = 0;
-    while (*(str+i) != '\0') {
-        *(str+i) = toupper(*(str+i));
+    while (*(str + i) != '\0') {
+        *(str + i) = toupper(*(str + i));
         i++;
         if (i == max_bytes_to_change) {
             break;
@@ -409,13 +524,90 @@ void my_strnupr(char *str, int max_bytes_to_change){
     }
 }
 
-void my_strnlwr(char *str, int max_bytes_to_change){
+void my_strnlwr(char *str, int max_bytes_to_change) {
     int i = 0;
-    while (*(str+i) != '\0') {
-        *(str+i) = tolower(*(str+i));
+    while (*(str + i) != '\0') {
+        *(str + i) = tolower(*(str + i));
         i++;
         if (i == max_bytes_to_change) {
             break;
         }
     }
+}
+
+void my_sort_strings_alphabetically() {
+    int rows = 5;
+    int cols = 50;
+
+    // original names
+    char *s1 = "George";
+    char *s2 = "Alfred";
+    char *s3 = "Kay";
+    char *s4 = "Zelda";
+    char *s5 = "Stephen";
+    printf("original names:\n%s\n%s\n%s\n%s\n%s\n", s1, s2, s3, s4, s5);
+
+    // put the strings into a table for sorting
+    char **row = (char **)malloc(rows * sizeof(char *));
+    for (int r = 0; r < rows; ++r) {
+        row[r] = (char *)malloc(cols * sizeof(char));
+    }
+
+    // strncpy(dest,src,n) copies at most n bytes, where n includes the nul terminator
+    // will copy until nul terminator (inclusive) or n bytes, whichever comes first
+    strncpy(row[0], s1, cols);
+    strncpy(row[1], s2, cols);
+    strncpy(row[2], s3, cols);
+    strncpy(row[3], s4, cols);
+    strncpy(row[4], s5, cols);
+
+    // compare adjacent strings, swap if necessary
+    char *temp = (char *)malloc(cols * sizeof(char));
+    for (int i = 0; i < rows - 1; ++i) {
+        for (int r = 0; r < rows - 1; ++r) {
+            // compare the strings
+            int ret_val = strncmp((const char *)row[r], (const char *)row[r + 1], cols);
+
+            // swap positions if [r+1] string < [r] string. nothing needs done if [r] < [r+1] and
+            // nothing needs done if [r] == [r+1]
+            if (ret_val > 0) {
+                strncpy(temp, row[r + 1], cols);
+                strncpy(row[r + 1], row[r], cols);
+                strncpy(row[r], temp, cols);
+            }
+        }
+    }
+
+    // print results and cleanup
+    free(temp);
+    temp = NULL;
+    printf("sorted names:\n");
+    for (int r = 0; r < rows; ++r) {
+        printf("%s\n", row[r]);
+        free(row[r]);
+        row[r] = NULL;
+    }
+    free(row);
+    row = NULL;
+    printf("\n");
+}
+
+void my_copy_string() {
+    char str_in[] = "Dog0123456789";
+
+    // strlen does not include nul terminator eg. strlen("Dog")=3
+    char *str_new = (char *)calloc(strlen(str_in) + 1, sizeof(char));
+
+    // copy char by char
+    for (int i = 0; i < strlen(str_in); ++i) {
+        str_new[i] = str_in[i];
+    }
+
+    // if input string was "Dog", str_new would have 4 (strlen+1) elements in index 0 to 3
+    str_new[strlen(str_in)] = '\0';
+    printf("%s\n", str_new);
+
+    // clean up
+    free(str_new);
+    str_new = NULL;
 }
