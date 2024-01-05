@@ -13,7 +13,7 @@
 // "struct person". with typedef, we're essentially doing:
 // typedef "struct person" person
 // we can now instantiate instances of the structure using only:
-// person p1 
+// person p1
 typedef struct person {
     char name[50];
     int age;
@@ -98,30 +98,60 @@ int main() {
     print_struct_person_by_value(*m_curie);
     free(m_curie);
     m_curie = NULL;
-    printf("\n");
 
     // members of a union share the same memory
     animal_struct dog_struct;
     animal_union dog_union;
     printf("size of dog struct is: %lu\n", sizeof(dog_struct));
     printf("size of dog union is: %lu\n", sizeof(dog_union));
+    printf("\n");
 
+    // enums give us related constants
     // enum: typedef of unnamed enum will have only a bool_t type
+    printf("enums\n");
     typedef enum { FALSE, TRUE } bool_t;
     bool_t falsey = FALSE;
     !(FALSE) ? printf("falsey = %d\n", falsey) : 1;
 
     // enum: simple
     enum vals { start = 10, next1, next2, end };
-    enum vals ebegin = start;
-    printf("start = %d\n", ebegin);
-    enum vals en1 = next1;
-    printf("next1 = %d\n", en1);
-    enum vals en2 = next2;
-    printf("next2 = %d\n", en2);
-    enum vals eend = end;
-    printf("next3 = %d\n", eend);
+    // declaring "ebegin" of type "enum vals" and assigning "start" to it
+    enum vals enum_begin = start;
+    printf("start = %d\n", enum_begin);
+    enum vals enum1 = next1;
+    printf("next1 = %d\n", enum1);
+    enum vals enum2 = next2;
+    printf("next2 = %d\n", enum2);
+    enum vals enum_end = end;
+    printf("next3 = %d\n", enum_end);
+    // use type def to create a more concise name for the type (instead of "enum vals")
+    typedef enum vals vals_t;
+    vals_t new_val = next2;
+    printf("new_val = %d\n", new_val);
+    printf("\n");
 
+    // enum flags: don't need to create type of "enum design_flags" but can still
+    // use the enum constants
+    enum design_flgs{ ITALICS = 1, BOLD = 2, UNDERLINE = 4 };
+    int my_design = BOLD | UNDERLINE; 
+    //    00000010
+    //  | 00000100
+    //  ___________
+    //    00000110
+	printf("my design flag = %d\n", my_design);
+    printf("\n");
+
+    // enum: don't even need the enum tag yet can still use the enum constant
+    enum {ICE_CREAM = 1, CONE=2, SPRINKLES=4, SAUCE=8};
+    int my_ice_cream = ICE_CREAM | CONE | SAUCE;
+    //    00000001
+    //  | 00000010
+    //  | 00001000
+    //  ___________
+    //    00001011
+	printf("my ice cream = %d\n", my_ice_cream);
+    printf("\n");
+	
     // strings
     // very bad: no space for implicit nul terminator, will not behave like a string!
     // very bad: char bad_string_array[5] = "Harry";
@@ -335,6 +365,33 @@ my_naughty_label:
 
     // calculate sum via recursion
     printf("recursion sum = %d\n", recursion_sum(3));
+    printf("\n");
+
+    // fileIO: writing to file
+    FILE *fh_out = fopen("your-file.txt", "w");
+    if (!fh_out) {
+        fprintf(stderr, "error: file opening failed\n");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(fh_out, "hello world for the %dth time!", 1000);
+    fclose(fh_out);
+
+    // fileIO: reading from file
+    FILE *fh_in = fopen("your-file.txt", "r");
+    if (!fh_in) {
+        fprintf(stderr, "error: file opening failed\n");
+        exit(EXIT_FAILURE);
+    }
+    char line[256];
+    // readin line by line. fgets() strips the '\n' character
+    while (fgets(line, sizeof(line), fh_in)) {
+        fprintf(stdout, "%s\n", line);
+    }
+    fclose(fh_in);
+    printf("\n");
+
+    // predefined preprocessor macro
+    printf("Current time: %s\n",__TIME__);   
 
     return 0;
 }
