@@ -1,4 +1,4 @@
-# choose a sanitizer flag
+# choose which flags to use with Google's Sanitizer
 SANITIZEFLAGS := -fsanitize=address -fno-omit-frame-pointer
 # SANITIZEFLAGS := -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer
 # SANITIZEFLAGS := -fsanitize=undefined

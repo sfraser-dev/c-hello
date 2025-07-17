@@ -12,9 +12,9 @@
 
 #include "pcre2.h"
 
-/* $> sudo apt-get -y install pcre2-utils */
+/* To install pcre2 */
 /* sudo apt-get -y install libpcre2-dev */
-/* These install pcre2 */
+/* sudo apt-get -y install pcre2-utils */
 
 char **my_regex_pcre2_compile_and_match(const char *, const char *, int *);
 void my_regex_pcre2_print_results(const char **, const int);

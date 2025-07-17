@@ -5,8 +5,9 @@
 
 /* https://lloydrochester.com/post/c/regex_pcre/ */
 
-/* $> apt-get install libpcre3 libpcre3-dev
-This installs pcre (version 1!) */
+/* Install pcre1 (version 1, yes, package called 3!) */
+/* apt-get install libpcre3 libpcre3-dev */
+/* apt-get install pcregrep */
 
 /* gcc pcre-regex.c -lpcre -o a.out */
 

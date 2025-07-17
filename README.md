@@ -1,5 +1,8 @@
 # C code review
 
+- `make clean`
+- `make all`
+
 ## Memory checking: Google Sanitizer
 
 Can Make with sanitizer on for Google's memory checking. If compiled with
@@ -25,4 +28,10 @@ sanitizer on.
 
 ## Regular Expressions
 
-Implements regex in C using Philip Hazel's PCRE (Perl Compatible Regular Expressions) library.
+Implements regex in C using Philip Hazel's PCRE (Perl Compatible Regular Expressions) library (<https://www.pcre.org/>).
+
+On Debian / Ubuntu, install PCRE1 (libpcre3-dev (yes, 3!) and PCRE2 (libpcre2-dev) via:
+
+- PCRE1: `sudo apt install libpcre3 libpcre3-dev pcregrep `
+- PCRE2: `sudo apt install libpcre2 pcre2-utils`
+
