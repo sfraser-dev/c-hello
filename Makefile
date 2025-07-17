@@ -1,8 +1,8 @@
 # choose which flags to use with Google's Sanitizer
-SANITIZEFLAGS := -fsanitize=address -fno-omit-frame-pointer
+#SANITIZEFLAGS := -fsanitize=address -fno-omit-frame-pointer
 # SANITIZEFLAGS := -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer
 # SANITIZEFLAGS := -fsanitize=undefined
-# SANITIZEFLAGS :=
+ SANITIZEFLAGS :=
 
 CC := clang
 CFLAGS := -g -Wall $(SANITIZEFLAGS)
