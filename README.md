@@ -30,8 +30,7 @@ sanitizer on.
 
 Implements regex in C using Philip Hazel's PCRE (Perl Compatible Regular Expressions) library (<https://www.pcre.org/>).
 
-On Debian / Ubuntu, install PCRE1 (libpcre3-dev (yes, 3!) and PCRE2 (libpcre2-dev) via:
+On Debian / Ubuntu, install PCRE1 (libpcre3-dev (yes, 3!) and PCRE2 (libpcre2-dev)) via:
 
-- PCRE1: `sudo apt install libpcre3 libpcre3-dev pcregrep `
+- PCRE1: `sudo apt install libpcre3 libpcre3-dev pcregrep`
 - PCRE2: `sudo apt install libpcre2 pcre2-utils`
-
