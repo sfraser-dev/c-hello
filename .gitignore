@@ -1,12 +1,10 @@
-# Created by https://www.toptal.com/developers/gitignore/api/c
-# Edit at https://www.toptal.com/developers/gitignore?templates=c
-
 # Me
 *.log
 a.out
 hello
 *.swp
 *.txt
+!CMakeLists.txt
 
 ### C ###
 # Prerequisites
@@ -62,4 +60,15 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# End of https://www.toptal.com/developers/gitignore/api/c
+# CMake
+# CMake build directory
+/build/
+# Common CMake generated files/directories
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+.cmake/
+_CPack_Packages/
+DartConfiguration.tcl

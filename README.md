@@ -34,3 +34,10 @@ On Debian / Ubuntu, install PCRE1 (libpcre3-dev (yes, 3!) and PCRE2 (libpcre2-de
 
 - PCRE1: `sudo apt install libpcre3 libpcre3-dev pcregrep`
 - PCRE2: `sudo apt install libpcre2 pcre2-utils`
+
+## Cmake
+
+- `cd build`
+- `cmake ..`
+- `make clean`
+- `make all`
