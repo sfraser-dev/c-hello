@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <stdlib.h>
 
 #define MAX_TASKS 100
 #define MAX_DESC 256
@@ -18,14 +19,17 @@ typedef struct {
 Task tasks[MAX_TASKS];
 int task_count = 0;
 
+void trim_newline(char *s) {
+    s[strcspn(s, "\n")] = '\0';
+}
+
 void add_task(const char *desc, int priority, time_t deadline) {
     if (task_count >= MAX_TASKS) {
         printf("Task limit reached!\n");
         return;
     }
     tasks[task_count].id = task_count + 1;
-    strncpy(tasks[task_count].description, desc, MAX_DESC - 1);
-    tasks[task_count].description[MAX_DESC - 1] = '\0';
+    snprintf(tasks[task_count].description, MAX_DESC, "%s", desc);
     tasks[task_count].priority = (priority < 1 || priority > 5) ? 3 : priority;
     tasks[task_count].deadline = deadline;
     tasks[task_count].completed = 0;
@@ -56,7 +60,7 @@ void list_tasks() {
     for (int i = 0; i < task_count; i++) {
         char time_str[26];
         ctime_r(&tasks[i].deadline, time_str);
-        time_str[strlen(time_str) - 1] = '\0'; // Remove newline
+        trim_newline(time_str);
         printf("ID: %d, Desc: %s, Priority: %d, Deadline: %s, %s\n",
                tasks[i].id, tasks[i].description, tasks[i].priority, time_str,
                tasks[i].completed ? "Completed" : "Pending");
@@ -77,7 +81,7 @@ void mark_completed(int id) {
 void save_tasks() {
     FILE *fp = fopen(FILENAME, "w");
     if (!fp) {
-        printf("Error opening file for writing.\n");
+        perror("Error opening file for writing");
         return;
     }
     for (int i = 0; i < task_count; i++) {
@@ -111,44 +115,67 @@ void load_tasks() {
 
 int main() {
     load_tasks();
-    char command[10], desc[MAX_DESC];
+    char command[20], desc[MAX_DESC];
     int id, priority;
     char date_str[20];
-    struct tm tm = {0};
-    time_t deadline;
+    struct tm tm;
 
     while (1) {
         printf("\nCommands: add (a), delete (d), list (l), complete (c), save (s), exit (e)\n");
         printf("Enter command: ");
-        scanf("%9s", command);
-        getchar(); // Clear newline
+        if (!fgets(command, sizeof(command), stdin)) {
+            printf("Error reading command.\n");
+            continue;
+        }
+        trim_newline(command);
         char cmd = command[0];
 
         if (cmd == 'a') {
             printf("Description: ");
-            fgets(desc, MAX_DESC, stdin);
-            desc[strcspn(desc, "\n")] = '\0';
+            if (!fgets(desc, sizeof(desc), stdin)) {
+                printf("Error reading description.\n");
+                continue;
+            }
+            desc[MAX_DESC - 1] = '\0';
+            trim_newline(desc);
 
             printf("Priority (1-5): ");
-            scanf("%d", &priority);
-            getchar();
+            if (scanf("%d", &priority) != 1) {
+                printf("Invalid priority.\n");
+                while (getchar() != '\n');
+                continue;
+            }
+            while (getchar() != '\n'); // clear input
 
             printf("Deadline (YYMMDD): ");
-            fgets(date_str, sizeof(date_str), stdin);
-            date_str[strcspn(date_str, "\n")] = '\0';
+            if (!fgets(date_str, sizeof(date_str), stdin)) {
+                printf("Error reading deadline.\n");
+                continue;
+            }
+            trim_newline(date_str);
+            memset(&tm, 0, sizeof(struct tm));
+            tm.tm_isdst = -1;
 
             if (strptime(date_str, "%y%m%d", &tm) == NULL) {
                 printf("Invalid date format (use YYMMDD).\n");
             } else {
-                tm.tm_hour = 12; // Avoids midnight boundary issues
-                deadline = mktime(&tm);
-                add_task(desc, priority, deadline);
+                tm.tm_hour = 12; // midday to avoid DST edge cases
+                time_t deadline = mktime(&tm);
+                if (deadline == -1) {
+                    printf("Invalid date.\n");
+                } else {
+                    add_task(desc, priority, deadline);
+                }
             }
 
         } else if (cmd == 'd') {
             printf("Task ID: ");
-            scanf("%d", &id);
-            getchar();
+            if (scanf("%d", &id) != 1) {
+                printf("Invalid ID.\n");
+                while (getchar() != '\n');
+                continue;
+            }
+            while (getchar() != '\n');
             delete_task(id);
 
         } else if (cmd == 'l') {
@@ -156,8 +183,12 @@ int main() {
 
         } else if (cmd == 'c') {
             printf("Task ID: ");
-            scanf("%d", &id);
-            getchar();
+            if (scanf("%d", &id) != 1) {
+                printf("Invalid ID.\n");
+                while (getchar() != '\n');
+                continue;
+            }
+            while (getchar() != '\n');
             mark_completed(id);
 
         } else if (cmd == 's') {
