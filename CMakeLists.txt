@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(SanitizerExample C)
 
 # Compiler settings
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall")
+set(CMAKE_C_COMPILER clang-20)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -D_XOPEN_SOURCE=700")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # Optional sanitizer flags
@@ -13,13 +13,14 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 
 # Include directories
+include_directories(src)
 include_directories(include)
 
 # Find PCRE and PCRE2 libraries
 find_library(PCRE_LIBRARY NAMES pcre)
 find_library(PCRE2_LIBRARY NAMES pcre2-8)
 
-# Executables
+# Existing executables
 add_executable(hello.exe src/hello.c)
 target_link_libraries(hello.exe ${PCRE_LIBRARY} ${PCRE2_LIBRARY})
 
@@ -34,9 +35,13 @@ target_link_libraries(pcre1-regex.exe ${PCRE_LIBRARY})
 add_executable(pcre2-regex.exe src/pcre2-regex.c)
 target_link_libraries(pcre2-regex.exe ${PCRE2_LIBRARY})
 
+# Task manager executable
+add_executable(task_manager.exe src/task_manager.c)
+
 # Clean target
 add_custom_target(clean_all
-    COMMAND ${CMAKE_COMMAND} -E rm -f *.o *.exe *.out
+    COMMAND ${CMAKE_COMMAND} -E rm -f *.o *.exe *.out tasks.txt
+    COMMAND ${CMAKE_COMMAND} -E echo "Cleaning all generated files"
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Cleaning all generated files"
 )
